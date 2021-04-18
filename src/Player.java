@@ -8,64 +8,77 @@ import java.util.stream.Collectors;
  **/
 class Player {
 
-//        public static void main(String args[]) {
-//            Scanner in = new Scanner(System.in);
+        public static void main(String args[]) {
+            Scanner in = new Scanner(System.in);
+
+            Deque<Action> actionsToMake = new LinkedList<>();
+            // game loop
+            while (true) {
+                List<Action> castActionList = new ArrayList<>();
+                Map<Action, Integer> brewActionPrice = new HashMap<>();
+
+                int actionCount = in.nextInt(); // the number of spells and recipes in play
+                for (int i = 0; i < actionCount; i++) {
+                    int actionId = in.nextInt(); // the unique ID of this spell or recipe
+
+                    String actionType = in.next(); // in the first league: BREW; later: CAST, OPPONENT_CAST, LEARN, BREW
+                    int delta0 = in.nextInt(); // tier-0 ingredient change
+                    int delta1 = in.nextInt(); // tier-1 ingredient change
+                    int delta2 = in.nextInt(); // tier-2 ingredient change
+                    int delta3 = in.nextInt(); // tier-3 ingredient change
+
+                    int price = in.nextInt(); // the price in rupees if this is a potion
+                    Action action = new Action(actionId, actionType, Arrays.asList(delta0, delta1, delta2, delta3));
+
+                    if (actionType.equalsIgnoreCase("BREW")) {
+                        brewActionPrice.put(action, price);
+                    } else if (actionType.equalsIgnoreCase("CAST")) {
+                        castActionList.add(action);
+                    }
+
+                    int tomeIndex = in.nextInt(); // in the first two leagues: always 0; later: the index in the tome if this is a tome spell, equal to the read-ahead tax; For brews, this is the value of the current urgency bonus
+                    int taxCount = in.nextInt(); // in the first two leagues: always 0; later: the amount of taxed tier-0 ingredients you gain from learning this spell; For brews, this is how many times you can still gain an urgency bonus
+                    boolean castable = in.nextInt() != 0; // in the first league: always 0; later: 1 if this is a castable player spell
+                    boolean repeatable = in.nextInt() != 0; // for the first two leagues: always 0; later: 1 if this is a repeatable player spell
+                }
+
+                Inventory currentInventory = new Inventory();
+                Inventory enemyInventory = new Inventory();
+                for (int i = 0; i < 2; i++) {
+                    int inv0 = in.nextInt(); // tier-0 ingredients in inventory
+                    int inv1 = in.nextInt();
+                    int inv2 = in.nextInt();
+                    int inv3 = in.nextInt();
+                    if (i == 0) {
+                        currentInventory = new Inventory(Arrays.asList(inv0, inv1, inv2, inv3));
+                    } else {
+                        enemyInventory = new Inventory(Arrays.asList(inv0, inv1, inv2, inv3));
+                    }
+                    int score = in.nextInt(); // amount of rupees
+                }
+
+                //find max
+                Map.Entry<Action, Integer> maxEntry = null;
+                for (Map.Entry<Action, Integer> entry : brewActionPrice.entrySet()) {
+                    if (maxEntry == null || entry.getValue() > maxEntry.getValue()) {
+                        maxEntry = entry;
+                    }
+                }
+                Recipe currentTargetRecipe = new Recipe(maxEntry.getKey());
+
+          boolean isEnoughIngredient = LogicEngine.findMissingIngredient(currentInventory, currentTargetRecipe).stream()
+                .allMatch(i -> i == 0);
 //
-//            Deque<Action> actionsToMake = new LinkedList<>();
-//            // game loop
-//            while (true) {
-//                List<Action> castActionList = new ArrayList<>();
-//                Map<Action, Integer> brewActionPrice = new HashMap<>();
-//
-//                int actionCount = in.nextInt(); // the number of spells and recipes in play
-//                for (int i = 0; i < actionCount; i++) {
-//                    int actionId = in.nextInt(); // the unique ID of this spell or recipe
-//
-//                    String actionType = in.next(); // in the first league: BREW; later: CAST, OPPONENT_CAST, LEARN, BREW
-//                    int delta0 = in.nextInt(); // tier-0 ingredient change
-//                    int delta1 = in.nextInt(); // tier-1 ingredient change
-//                    int delta2 = in.nextInt(); // tier-2 ingredient change
-//                    int delta3 = in.nextInt(); // tier-3 ingredient change
-//
-//                    int price = in.nextInt(); // the price in rupees if this is a potion
-//                    Action action = new Action(actionId, actionType, Arrays.asList(delta0, delta1, delta2, delta3));
-//
-//                    if (actionType.equalsIgnoreCase("BREW")) {
-//                        brewActionPrice.put(action, price);
-//                    } else if (actionType.equalsIgnoreCase("CAST")) {
-//                        castActionList.add(action);
-//                    }
-//
-//                    int tomeIndex = in.nextInt(); // in the first two leagues: always 0; later: the index in the tome if this is a tome spell, equal to the read-ahead tax; For brews, this is the value of the current urgency bonus
-//                    int taxCount = in.nextInt(); // in the first two leagues: always 0; later: the amount of taxed tier-0 ingredients you gain from learning this spell; For brews, this is how many times you can still gain an urgency bonus
-//                    boolean castable = in.nextInt() != 0; // in the first league: always 0; later: 1 if this is a castable player spell
-//                    boolean repeatable = in.nextInt() != 0; // for the first two leagues: always 0; later: 1 if this is a repeatable player spell
-//                }
-//
-//                Inventory currentInventory = new Inventory();
-//                Inventory enemyInventory = new Inventory();
-//                for (int i = 0; i < 2; i++) {
-//                    int inv0 = in.nextInt(); // tier-0 ingredients in inventory
-//                    int inv1 = in.nextInt();
-//                    int inv2 = in.nextInt();
-//                    int inv3 = in.nextInt();
-//                    if (i == 0) {
-//                        currentInventory = new Inventory(Arrays.asList(inv0, inv1, inv2, inv3));
-//                    } else {
-//                        enemyInventory = new Inventory(Arrays.asList(inv0, inv1, inv2, inv3));
-//                    }
-//                    int score = in.nextInt(); // amount of rupees
-//                }
-//
-//                //find max
-//                Map.Entry<Action, Integer> maxEntry = null;
-//                for (Map.Entry<Action, Integer> entry : brewActionPrice.entrySet()) {
-//                    if (maxEntry == null || entry.getValue() > maxEntry.getValue()) {
-//                        maxEntry = entry;
-//                    }
-//                }
-//                Recipe currentTargetRecipe = new Recipe(maxEntry.getKey());
-//
+                if (actionsToMake.isEmpty() && !isEnoughIngredient){
+                    actionsToMake = LogicEngine.findActionToGetRemainingIngredients(currentInventory, currentTargetRecipe, castActionList);
+                    System.out.println(actionsToMake.pop());
+                }else if (actionsToMake.isEmpty()){
+                    System.out.println("BREW " + maxEntry.getKey().actionId);
+                }else{
+                    System.out.println(actionsToMake.pop());
+                }
+
+
 //
 //                if(actionsToMake.isEmpty() && LogicEngine.isInventorySubsetOfRecipe(currentInventory, currentTargetRecipe, true)) {
 //                    actionsToMake = LogicEngine.findActionsToGetRemainingIngredients(currentInventory, currentTargetRecipe, castActionList);
@@ -75,38 +88,121 @@ class Player {
 //                }else{
 //                    System.out.println(actionsToMake.pop());
 //                }
-//
-//
-//
-//                // in the first league: BREW <id> | WAIT; later: BREW <id> | CAST <id> [<times>] | LEARN <id> | REST | WAIT
-//    //            System.out.println("BREW " + actionIDList.get(maxPriceIndex));
-//
-//            }
-//        }
 
-    public static void main(String[] args) {
-        Inventory inventory = new Inventory(List.of(0, 0, 0, 0));
-        Action get0 = new Action(78, "CAST", List.of(2, 0, 0, 0));
-        Action get1 = new Action(79, "CAST", List.of(-1, 1, 0, 0));
-        Action get2 = new Action(80, "CAST", List.of(0, -1, 1, 0));
-        Action get3 = new Action(81, "CAST", List.of(0, 0, -1, 1));
 
-        List<Action> actionList = List.of(get0, get1, get2, get3);
-        ////        System.out.println(LogicEngine.castSpellForIngredient(get0, inventory));
-        ////        System.out.println(LogicEngine.castSpellForIngredient(get1, inventory));
-        //
-        Recipe sample = new Recipe(List.of(0, 0, 3, 2));
 
-        //        System.out.println(LogicEngine.isInventorySubsetOfRecipe(inventory, sample));
-        //
-        //
-        Deque<Action> actionsToMake = LogicEngine.findActionsToGetRemainingIngredients(inventory, sample, actionList);
-        System.out.println(actionsToMake);
-    }
+                // in the first league: BREW <id> | WAIT; later: BREW <id> | CAST <id> [<times>] | LEARN <id> | REST | WAIT
+    //            System.out.println("BREW " + actionIDList.get(maxPriceIndex));
+
+            }
+        }
+
+//    public static void main(String[] args) {
+//        Inventory inventory = new Inventory(List.of(0, 0, 1, 0));
+//        Action get0 = new Action(78, "CAST", List.of(2, 0, 0, 0));
+//        Action get1 = new Action(79, "CAST", List.of(-1, 1, 0, 0));
+//        Action get2 = new Action(80, "CAST", List.of(0, -1, 1, 0));
+//        Action get3 = new Action(81, "CAST", List.of(0, 0, -1, 1));
+//
+//        List<Action> actionList = List.of(get0, get1, get2, get3);
+//        ////        System.out.println(LogicEngine.castSpellForIngredient(get0, inventory));
+//        ////        System.out.println(LogicEngine.castSpellForIngredient(get1, inventory));
+//        //
+//        Recipe sample = new Recipe(List.of(0, 0, 1, 0));
+//
+//        boolean isEnoughIngredient = LogicEngine.findMissingIngredient(inventory, sample).stream()
+//                .allMatch(i -> i == 0);
+//
+//        System.out.println(LogicEngine.findMissingIngredient(inventory, sample));
+//        System.out.println(isEnoughIngredient);
+////        System.out.println(LogicEngine.findActionToGetRemainingIngredients(inventory, sample, actionList));
+////        Deque<Action> actionsToMake = LogicEngine.findActionsToGetRemainingIngredients(inventory, sample, actionList);
+////        System.out.println(actionsToMake);
+//    }
 
 }
 
 class LogicEngine {
+
+
+    public static Deque<Action> findActionToGetRemainingIngredients(Inventory inventory, Recipe recipe, List<Action> actionList){
+        List<Integer> missingIngredients = findMissingIngredient(inventory, recipe);
+        Deque<Action> actionsToMake = new LinkedList<>();
+        for (int i = missingIngredients.size() - 1; i >= 0; i--) {
+            if (missingIngredients.get(i) > 0){
+                for (int j = 0; j < missingIngredients.get(i); j++){
+                    actionsToMake.addAll(getTieredIngredient(inventory, i, actionList));
+                    actionsToMake.add(new Action("REST"));
+                }
+            }
+        }
+        return actionsToMake;
+    }
+
+    private static List<Action> getTieredIngredient(Inventory inventory, int ingredientTier, List<Action> actionList){
+        List<Action> actionsToMake = new ArrayList<>();
+        //hardcoded for now
+        if (ingredientTier == 0){
+            actionsToMake.add(actionList.get(0));
+        }else if (ingredientTier == 1){
+            actionsToMake.addAll(getTier1Ingredient(inventory, actionList));
+        }else if (ingredientTier == 2){
+            actionsToMake.addAll(getTier2Ingredient(inventory, actionList));
+        }else{
+            actionsToMake.addAll(getTier3Ingredient(inventory, actionList));
+        }
+        return actionsToMake;
+    }
+
+    public static List<Integer> findMissingIngredient(Inventory currentInventory, Recipe recipe) {
+        Inventory copy = new Inventory(currentInventory);
+        List<Integer> difference = new ArrayList<>(Arrays.asList(new Integer[4])) ;
+        Collections.fill(difference, 0);
+        for (int i = 0; i < recipe.ingredientCost.size(); i++) {
+            int differenceAtI = recipe.ingredientCost.get(i) - copy.inventory.get(i);
+            if (differenceAtI > 0){
+                difference.set(i , differenceAtI);
+            }
+        }
+        return difference;
+    }
+
+    private static List<Action> getTier1Ingredient(Inventory inventory, List<Action> actionList){
+        List<Action> actionsToMake = new ArrayList<>();
+        if (inventory.inventory.get(0) >= 1){
+            actionsToMake.add(actionList.get(1));
+        }else{
+            actionsToMake.add(actionList.get(0));
+            actionsToMake.add(actionList.get(1));
+
+        }
+        return actionsToMake;
+    }
+
+    private static List<Action> getTier2Ingredient(Inventory inventory, List<Action> actionList){
+        List<Action> actionsToMake = new ArrayList<>();
+        if (inventory.inventory.get(1) >= 1){
+            actionsToMake.add(actionList.get(2));
+        }else{
+            actionsToMake.addAll(getTier1Ingredient(inventory, actionList));
+            actionsToMake.add(actionList.get(2));
+        }
+        return actionsToMake;
+    }
+
+    private static List<Action> getTier3Ingredient(Inventory inventory, List<Action> actionList){
+        List<Action> actionsToMake = new ArrayList<>();
+        if (inventory.inventory.get(2) >= 1){
+            actionsToMake.add(actionList.get(3));
+        }else{
+            actionsToMake.addAll(getTier2Ingredient(inventory, actionList));
+            actionsToMake.add(actionList.get(3));
+        }
+        return actionsToMake;
+    }
+
+
+
 
     private static int findIndexToRemoveLeadingZeroes(String string) {
         int index;
@@ -129,33 +225,35 @@ class LogicEngine {
         int leadingZeroesIndex = findIndexToRemoveLeadingZeroes(recipeNumber.toString());
 
 
-
         String builtRecipeNumber = recipeNumber.toString().substring(leadingZeroesIndex);
         String builtInventoryNumber = inventoryNumber.toString().substring(leadingZeroesIndex);
+
+        builtRecipeNumber = new StringBuilder(builtRecipeNumber).reverse().toString();
+        builtInventoryNumber = new StringBuilder(builtInventoryNumber).reverse().toString();
 
         return Integer.parseInt(builtRecipeNumber) - Integer.parseInt(builtInventoryNumber);
     }
 
-    public static Deque<Action> findActionsToGetRemainingIngredients(Inventory currentInventory, Recipe recipe, List<Action> availableActions) {
-        Deque<Action> actionsToMake = new LinkedList<>();
-        while (isInventorySubsetOfRecipe(currentInventory, recipe, true)) {
-            if (!isEnoughNumberOfBaseIngredient(currentInventory, recipe)) {
-                actionsToMake.add(availableActions.get(0));
-                currentInventory = castSpellForIngredient(availableActions.get(0), currentInventory);
-            }
-            for (int i = 1; i < availableActions.size(); i++) {
-                Inventory experimentalInventory = castSpellForIngredient(availableActions.get(i), currentInventory);
-                if (isInventorySubsetOfRecipe(experimentalInventory, recipe, false)) {
-                    actionsToMake.add(availableActions.get(i));
-                    currentInventory = new Inventory(experimentalInventory);
-                }
-            }
-            actionsToMake.add(new Action("REST"));
-
-        }
-        return actionsToMake;
-
-    }
+//    public static Deque<Action> findActionsToGetRemainingIngredients(Inventory currentInventory, Recipe recipe, List<Action> availableActions) {
+//        Deque<Action> actionsToMake = new LinkedList<>();
+//        while (isInventorySubsetOfRecipe(currentInventory, recipe, true)) {
+//            if (!isEnoughNumberOfBaseIngredient(currentInventory, recipe)) {
+//                actionsToMake.add(availableActions.get(0));
+//                currentInventory = castSpellForIngredient(availableActions.get(0), currentInventory);
+//            }
+//            for (int i = 1; i < availableActions.size(); i++) {
+//                Inventory experimentalInventory = castSpellForIngredient(availableActions.get(i), currentInventory);
+//                if (isInventorySubsetOfRecipe(experimentalInventory, recipe, false)) {
+//                    actionsToMake.add(availableActions.get(i));
+//                    currentInventory = new Inventory(experimentalInventory);
+//                }
+//            }
+//            actionsToMake.add(new Action("REST"));
+//
+//        }
+//        return actionsToMake;
+//
+//    }
 
     //check if the ingredients in inventory would all be used up for recipe (including after transformations)
     public static boolean isInventorySubsetOfRecipe(Inventory currentInventory, Recipe recipe, boolean isProperSubset) {
@@ -200,15 +298,7 @@ class LogicEngine {
         return maxIndexToLook;
     }
 
-    private static List<Integer> findMissingIngredient(Inventory currentInventory, Recipe recipe) {
-        Inventory copy = new Inventory(currentInventory);
-        List<Integer> difference = new ArrayList<>();
-        for (int i = 0; i < recipe.ingredientCost.size(); i++) {
-            difference.add(recipe.ingredientCost.get(i) - copy.inventory.get(i));
-        }
-        difference = difference.stream().filter(e -> e < 0).collect(Collectors.toList());
-        return difference;
-    }
+
 }
 
 class Inventory {
