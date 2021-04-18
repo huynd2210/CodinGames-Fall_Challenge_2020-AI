@@ -1,0 +1,18 @@
+
+U	java:S106l"9Replace this use of System.out or System.err by a logger.(ÿè©ü8¶½èÀŒ/
+U	java:S106c"9Replace this use of System.out or System.err by a logger.(ªƒõè8Ï‰âÀŒ/
+]	java:S125_"<This block of commented-out lines of code should be removed.(†¡Å…şÿÿÿÿ8Ï‰âÀŒ/
+]
+java:S1144¯":Remove this unused private "findMissingIngredient" method.(¶Ãö‚ÿÿÿÿÿ8ŸÔ’ˆŒ/
+?
+java:S1170¼"!Make this final field static too.(ıúñİ8üûùŠŒ/
+‚
+java:S1149ñ"_Replace the synchronized class "StringBuffer" by an unsynchronized one such as "StringBuilder".(Éâİ‹øÿÿÿÿ8£‰‹Œ/
+‚
+java:S1149"_Replace the synchronized class "StringBuffer" by an unsynchronized one such as "StringBuilder".(ÍÕô·ùÿÿÿÿ8ŒÄµ‹Œ/
+\
+java:S1118i":Add a private constructor to hide the implicit public one.(ÔÀäæûÿÿÿÿ8¨ùŠŒ/
+5
+java:S1700»"Rename field "inventory"(¯Ö¦]8üûùŠŒ/
+]	java:S125"<This block of commented-out lines of code should be removed.(õ÷Íûÿÿÿÿ8ÏÎáÀŒ/
+X	java:S125Z"<This block of commented-out lines of code should be removed.(˜ü«È8Ï‰âÀŒ/
